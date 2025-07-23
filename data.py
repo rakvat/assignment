@@ -46,7 +46,6 @@ ROOM_USES: dict[RoomUseKey, Person | Function] = {
         past_activity=0.4,
         was_lucky_with_room_before=0.3,
         reluctance_to_move=0.6,
-        min_room_size_wish=16,
     ),
     RoomUseKey.FW: Person(
         key=RoomUseKey.FW,
@@ -108,7 +107,7 @@ ROOM_USES: dict[RoomUseKey, Person | Function] = {
         past_activity=0.8,
         was_lucky_with_room_before=0.5,
         reluctance_to_move=0.6,
-        min_room_size_wish=15,
+        min_room_size_wish=18,
     ),
     RoomUseKey.AZ: Person(
         key=RoomUseKey.AZ,
@@ -125,7 +124,7 @@ ROOM_USES: dict[RoomUseKey, Person | Function] = {
         past_activity=0.2,
         was_lucky_with_room_before=0.9,
         reluctance_to_move=0.2,
-        min_room_size_wish=16,
+        min_room_size_wish=20,
     ),
     RoomUseKey.VH: Person(
         key=RoomUseKey.VH,
