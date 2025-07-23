@@ -2,7 +2,7 @@ from ortools.sat import cp_model_pb2
 from ortools.sat.python import cp_model
 
 from enums import RoomKey, RoomUseKey
-from data import ROOMS, ROOM_USES
+from data import ROOMS, ROOM_USES, N
 
 
 def print_result(
@@ -22,7 +22,7 @@ def print_result(
 
     print(f"Objective: {solver.objective_value:.2f}")
     print("********************")
-    for room in range(N := len(room_assignments)):
+    for room in range(N):
         assigned_use = [
             use for use in range(N) if solver.Value(room_assignments[room][use])
         ][0]

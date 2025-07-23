@@ -295,3 +295,7 @@ PASSTHROUGH_CANDIDATE_KEYS: set[tuple[RoomUseKey, RoomUseKey]] = {
     (RoomUseKey.MB, RoomUseKey.WF),
     (RoomUseKey.AZ, RoomUseKey.LR),
 }
+
+assert (N := len(ROOMS)) == len(
+    ROOM_USES
+), "as we do 1-to-1 assignment, the number of rooms has to equal the number of room uses"

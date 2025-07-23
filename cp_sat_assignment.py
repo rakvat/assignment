@@ -6,6 +6,7 @@ from data import (
     PASSTHROUGH_ROOM_KEYS,
     PASSTHROUGH_CANDIDATE_KEYS,
     FUNCTIONAL_USES,
+    N,
 )
 from enums import RoomKey, RoomUseKey
 from constants import OTHER_HOUSE, NEIGHBOR, SAME_FLOOR, SAME_HOUSE
@@ -14,12 +15,12 @@ from entities import Person
 from utils import (
     room_to_use,
     use_to_room,
-    distance,
 )
-
-assert (N := len(ROOMS)) == len(
-    ROOM_USES
-), "as we do 1-to-1 assignment, the number of rooms has to equal the number of room uses"
+from constraints import (
+    min_distance_allowed_constraint,
+    max_distance_allowed_constraint,
+    small_distance_forbidden_constraint,
+)
 
 TOP_N = 10
 
@@ -56,31 +57,13 @@ model.add_allowed_assignments(
 )
 
 # FW and JW in separate houses
-model.add_allowed_assignments(
-    [
-        *[assignments[room][RoomUseKey.FW.value] for room in range(N)],
-        *[assignments[room][RoomUseKey.JH.value] for room in range(N)],
-    ],
-    [
-        [*use_to_room(room1), *use_to_room(room2)]
-        for room1 in RoomKey
-        for room2 in RoomKey
-        if distance(room1, room2) >= OTHER_HOUSE
-    ],
+min_distance_allowed_constraint(
+    model, assignments, RoomUseKey.FW, RoomUseKey.JH, OTHER_HOUSE
 )
 
 # AZ not next to CJ
-model.add_forbidden_assignments(
-    [
-        *[assignments[room][RoomUseKey.AZ.value] for room in range(N)],
-        *[assignments[room][RoomUseKey.CJ.value] for room in range(N)],
-    ],
-    [
-        [*use_to_room(room1), *use_to_room(room2)]
-        for room1 in RoomKey
-        for room2 in RoomKey
-        if distance(room1, room2) <= NEIGHBOR
-    ],
+small_distance_forbidden_constraint(
+    model, assignments, RoomUseKey.AZ, RoomUseKey.CJ, NEIGHBOR
 )
 
 # passthrough room restrictions (room1 is the one you need to pass through to reach room2)
@@ -110,18 +93,7 @@ for person1, person2 in [
     (RoomUseKey.VH, RoomUseKey.JH),
     (RoomUseKey.MB, RoomUseKey.WF),
 ]:
-    model.add_allowed_assignments(
-        [
-            *[assignments[room][person1.value] for room in range(N)],
-            *[assignments[room][person2.value] for room in range(N)],
-        ],
-        [
-            [*use_to_room(room1), *use_to_room(room2)]
-            for room1 in RoomKey
-            for room2 in RoomKey
-            if distance(room1, room2) <= SAME_FLOOR
-        ],
-    )
+    max_distance_allowed_constraint(model, assignments, person1, person2, SAME_FLOOR)
 
 # same house wishes
 for person1, person2 in [
@@ -134,18 +106,7 @@ for person1, person2 in [
     (RoomUseKey.AZ, RoomUseKey.LR),
     (RoomUseKey.VH, RoomUseKey.LR),
 ]:
-    model.add_allowed_assignments(
-        [
-            *[assignments[room][person1.value] for room in range(N)],
-            *[assignments[room][person2.value] for room in range(N)],
-        ],
-        [
-            [*use_to_room(room1), *use_to_room(room2)]
-            for room1 in RoomKey
-            for room2 in RoomKey
-            if distance(room1, room2) <= SAME_HOUSE
-        ],
-    )
+    max_distance_allowed_constraint(model, assignments, person1, person2, SAME_HOUSE)
 
 # size wishes
 for use_key in RoomUseKey:
