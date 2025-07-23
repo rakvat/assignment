@@ -1,37 +1,78 @@
+import operator
+from ortools.sat.python import cp_model
+from ortools.sat.python.cp_model import CpModel, Constraint, LinearExprT, IntegralT
+from typing import Callable, Sequence, Iterable
+
 from enums import RoomKey, RoomUseKey
 from data import N
 from utils import use_to_room, distance
 
 
 def max_distance_allowed_constraint(
-    model,
-    assignments,
+    model: CpModel,
+    assignments: list[list[cp_model.IntVar]],
     person1: RoomUseKey,
     person2: RoomUseKey,
     distance_threshold: int,
 ) -> None:
-    model.add_allowed_assignments(
-        [
-            *[assignments[room][person1.value] for room in range(N)],
-            *[assignments[room][person2.value] for room in range(N)],
-        ],
-        [
-            [*use_to_room(room1), *use_to_room(room2)]
-            for room1 in RoomKey
-            for room2 in RoomKey
-            if distance(room1, room2) <= distance_threshold
-        ],
+    _distance_constraint(
+        model.add_allowed_assignments,
+        assignments,
+        person1,
+        person2,
+        distance_threshold,
+        operator.le,
     )
 
 
 def min_distance_allowed_constraint(
-    model,
-    assignments,
+    model: CpModel,
+    assignments: list[list[cp_model.IntVar]],
     person1: RoomUseKey,
     person2: RoomUseKey,
     distance_threshold: int,
 ) -> None:
-    model.add_allowed_assignments(
+    _distance_constraint(
+        model.add_allowed_assignments,
+        assignments,
+        person1,
+        person2,
+        distance_threshold,
+        operator.ge,
+    )
+
+
+def small_distance_forbidden_constraint(
+    model: CpModel,
+    assignments: list[list[cp_model.IntVar]],
+    person1: RoomUseKey,
+    person2: RoomUseKey,
+    distance_threshold: int,
+) -> None:
+    _distance_constraint(
+        model.add_forbidden_assignments,
+        assignments,
+        person1,
+        person2,
+        distance_threshold,
+        operator.le,
+    )
+
+
+ModelMethodType = Callable[
+    [Sequence[LinearExprT], Iterable[Sequence[IntegralT]]], Constraint
+]
+
+
+def _distance_constraint(
+    model_method: ModelMethodType,
+    assignments: list[list[cp_model.IntVar]],
+    person1: RoomUseKey,
+    person2: RoomUseKey,
+    distance_threshold: int,
+    comparison_operator,
+) -> None:
+    model_method(
         [
             *[assignments[room][person1.value] for room in range(N)],
             *[assignments[room][person2.value] for room in range(N)],
@@ -40,27 +81,6 @@ def min_distance_allowed_constraint(
             [*use_to_room(room1), *use_to_room(room2)]
             for room1 in RoomKey
             for room2 in RoomKey
-            if distance(room1, room2) >= distance_threshold
-        ],
-    )
-
-
-def small_distance_forbidden_constraint(
-    model,
-    assignments,
-    person1: RoomUseKey,
-    person2: RoomUseKey,
-    distance_threshold: int,
-) -> None:
-    model.add_forbidden_assignments(
-        [
-            *[assignments[room][person1] for room in range(N)],
-            *[assignments[room][person2] for room in range(N)],
-        ],
-        [
-            [*use_to_room(room1), *use_to_room(room2)]
-            for room1 in RoomKey
-            for room2 in RoomKey
-            if distance(room1, room2) <= distance_threshold
+            if comparison_operator(distance(room1, room2), distance_threshold)
         ],
     )
