@@ -6,11 +6,12 @@ from data import ROOMS, ROOM_USES
 
 
 def print_result(
+    rank: int,
     status: cp_model_pb2.CpSolverStatus,
     solver: cp_model.CpSolver,
     room_assignments: list[list[cp_model.IntVar]],
 ) -> None:
-    print("********************")
+    print(f"*Rank {rank:2}************")
     if status is cp_model.OPTIMAL:
         print("Optimal solution")
     elif status is cp_model.FEASIBLE:
@@ -19,6 +20,7 @@ def print_result(
         print("No solution found")
         return
 
+    print(f"Objective: {solver.objective_value:.2f}")
     print("********************")
     for room in range(N := len(room_assignments)):
         assigned_use = [

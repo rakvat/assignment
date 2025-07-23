@@ -1,6 +1,4 @@
 from ortools.sat.python import cp_model
-from statistics import stdev
-from copy import deepcopy
 
 from data import (
     ROOMS,
@@ -10,7 +8,7 @@ from data import (
     FUNCTIONAL_USES,
 )
 from enums import RoomKey, RoomUseKey
-from constants import OTHER_HOUSE, NEIGHBOR, SAME_FLOOR
+from constants import OTHER_HOUSE, NEIGHBOR, SAME_FLOOR, SAME_HOUSE
 from print_utils import print_result
 from entities import Person
 from utils import (
@@ -23,6 +21,7 @@ assert (N := len(ROOMS)) == len(
     ROOM_USES
 ), "as we do 1-to-1 assignment, the number of rooms has to equal the number of room uses"
 
+TOP_N = 10
 
 model = cp_model.CpModel()
 
@@ -104,24 +103,47 @@ for room1, room2 in PASSTHROUGH_ROOM_KEYS:
         ],
     )
 
-# children close to parents
-for parent, kid in [
+# same floor wishes
+for person1, person2 in [
     (RoomUseKey.JL, RoomUseKey.FW),
     (RoomUseKey.CH, RoomUseKey.FW),
     (RoomUseKey.VH, RoomUseKey.JH),
-    (RoomUseKey.SW, RoomUseKey.LW),
     (RoomUseKey.MB, RoomUseKey.WF),
 ]:
     model.add_allowed_assignments(
         [
-            *[assignments[room][parent.value] for room in range(N)],
-            *[assignments[room][kid.value] for room in range(N)],
+            *[assignments[room][person1.value] for room in range(N)],
+            *[assignments[room][person2.value] for room in range(N)],
         ],
         [
             [*use_to_room(room1), *use_to_room(room2)]
             for room1 in RoomKey
             for room2 in RoomKey
             if distance(room1, room2) <= SAME_FLOOR
+        ],
+    )
+
+# same house wishes
+for person1, person2 in [
+    (RoomUseKey.JL, RoomUseKey.CL),
+    (RoomUseKey.CH, RoomUseKey.CL),
+    (RoomUseKey.CH, RoomUseKey.FW),
+    (RoomUseKey.KE, RoomUseKey.CL),
+    (RoomUseKey.KE, RoomUseKey.FW),
+    (RoomUseKey.SW, RoomUseKey.LW),
+    (RoomUseKey.AZ, RoomUseKey.LR),
+    (RoomUseKey.VH, RoomUseKey.LR),
+]:
+    model.add_allowed_assignments(
+        [
+            *[assignments[room][person1.value] for room in range(N)],
+            *[assignments[room][person2.value] for room in range(N)],
+        ],
+        [
+            [*use_to_room(room1), *use_to_room(room2)]
+            for room1 in RoomKey
+            for room2 in RoomKey
+            if distance(room1, room2) <= SAME_HOUSE
         ],
     )
 
@@ -159,10 +181,22 @@ for use in RoomUseKey:
         for room in RoomKey
     )
 
+
 total_penality = sum(move_resistence_penality.values())
-
 model.minimize(total_penality)
+previous_solutions = []
 
-solver = cp_model.CpSolver()
-status = solver.solve(model)
-print_result(status, solver, assignments)
+for rank in range(1, TOP_N + 1):
+    solver = cp_model.CpSolver()
+    status = solver.solve(model)
+    print_result(rank, status, solver, assignments)
+    solution = [
+        solver.Value(assignments[room.value][use.value])
+        for use in RoomUseKey
+        for room in RoomKey
+    ]
+    previous_solutions.append(solution)
+    model.add_forbidden_assignments(
+        [assignments[room.value][use.value] for use in RoomUseKey for room in RoomKey],
+        previous_solutions,
+    )
