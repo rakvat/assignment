@@ -1,8 +1,8 @@
 from ortools.sat import cp_model_pb2
 from ortools.sat.python import cp_model
 
+from data import ROOM_USES, ROOMS, N
 from enums import RoomKey, RoomUseKey
-from data import ROOMS, ROOM_USES, N
 
 
 def print_result(

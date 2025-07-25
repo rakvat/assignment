@@ -1,26 +1,26 @@
 from ortools.sat.python import cp_model
 
+from constants import NEIGHBOR, OTHER_HOUSE, SAME_FLOOR, SAME_HOUSE
+from constraints import (
+    max_distance_allowed_constraint,
+    min_distance_allowed_constraint,
+    small_distance_forbidden_constraint,
+)
 from data import (
-    ROOMS,
-    ROOM_USES,
-    MIN_ROOM_SIZE,
-    PASSTHROUGH_ROOM_KEYS,
-    PASSTHROUGH_CANDIDATE_KEYS,
     FUNCTIONAL_USES,
+    MIN_ROOM_SIZE,
+    PASSTHROUGH_CANDIDATE_KEYS,
+    PASSTHROUGH_ROOM_KEYS,
+    ROOM_USES,
+    ROOMS,
     N,
 )
-from enums import RoomKey, RoomUseKey, House
-from constants import OTHER_HOUSE, NEIGHBOR, SAME_FLOOR, SAME_HOUSE
-from print_utils import print_result
 from entities import Person
+from enums import House, RoomKey, RoomUseKey
+from print_utils import print_result
 from utils import (
     room_to_use,
     use_to_room,
-)
-from constraints import (
-    min_distance_allowed_constraint,
-    max_distance_allowed_constraint,
-    small_distance_forbidden_constraint,
 )
 
 TOP_N = 10
@@ -89,9 +89,11 @@ for room1, room2 in PASSTHROUGH_ROOM_KEYS:
             [*room_to_use(use1), *room_to_use(use2)]
             for use1 in RoomUseKey
             for use2 in RoomUseKey
-            if use1 is not RoomUseKey.G and
+            if use1 is not RoomUseKey.G
+            and
             # use2 is functional -> use1 needs to be functional
-            not (use2 in FUNCTIONAL_USES and not use1 in FUNCTIONAL_USES) and
+            not (use2 in FUNCTIONAL_USES and use1 not in FUNCTIONAL_USES)
+            and
             # use1 and use2 non functiona -> only selected used allowed
             not (
                 use1 not in FUNCTIONAL_USES

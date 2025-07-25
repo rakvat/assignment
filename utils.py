@@ -1,6 +1,6 @@
-from enums import RoomUseKey, RoomKey, House
-from constants import SAME_HOUSE, SAME_FLOOR, OTHER_HOUSE
+from constants import OTHER_HOUSE, SAME_FLOOR, SAME_HOUSE
 from data import ROOM_CLOSENESS, ROOMS, N
+from enums import House, RoomKey, RoomUseKey
 
 
 # room gets assigned to a use

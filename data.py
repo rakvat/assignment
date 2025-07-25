@@ -1,6 +1,6 @@
-from entities import Person, Function, Room
-from enums import RoomUseKey, RoomKey, House
-from constants import PASSTHROUGH, SAME_FLOOR, NEIGHBOR
+from constants import NEIGHBOR, PASSTHROUGH
+from entities import Function, Person, Room
+from enums import House, RoomKey, RoomUseKey
 
 ROOM_USES: dict[RoomUseKey, Person | Function] = {
     RoomUseKey.G: Function(key=RoomUseKey.G),
@@ -297,6 +297,6 @@ PASSTHROUGH_CANDIDATE_KEYS: set[tuple[RoomUseKey, RoomUseKey]] = {
     (RoomUseKey.AZ, RoomUseKey.LR),
 }
 
-assert (N := len(ROOMS)) == len(
-    ROOM_USES
+assert (
+    (N := len(ROOMS)) == len(ROOM_USES)
 ), "as we do 1-to-1 assignment, the number of rooms has to equal the number of room uses"

@@ -1,11 +1,12 @@
 import operator
-from ortools.sat.python import cp_model
-from ortools.sat.python.cp_model import CpModel, Constraint, LinearExprT, IntegralT
-from typing import Callable, Sequence, Iterable
+from typing import Callable, Iterable, Sequence
 
-from enums import RoomKey, RoomUseKey
+from ortools.sat.python import cp_model
+from ortools.sat.python.cp_model import Constraint, CpModel, IntegralT, LinearExprT
+
 from data import N
-from utils import use_to_room, distance
+from enums import RoomKey, RoomUseKey
+from utils import distance, use_to_room
 
 
 def max_distance_allowed_constraint(

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from enums import House, RoomUseKey, RoomKey
+
+from enums import House, RoomKey, RoomUseKey
 
 
 @dataclass(frozen=True)
