@@ -20,6 +20,12 @@ class Person:
     def __repr__(self) -> str:
         return self.key.name
 
+    @property
+    def activity(self) -> float:
+        if self.child:
+            return 0.9  # children are not expected to work
+        return 0.3 * self.past_activity + 0.7 * self.current_activity
+
 
 @dataclass(frozen=True)
 class Function:

@@ -3,12 +3,13 @@ from ortools.sat.python import cp_model
 from data import (
     ROOMS,
     ROOM_USES,
+    MIN_ROOM_SIZE,
     PASSTHROUGH_ROOM_KEYS,
     PASSTHROUGH_CANDIDATE_KEYS,
     FUNCTIONAL_USES,
     N,
 )
-from enums import RoomKey, RoomUseKey
+from enums import RoomKey, RoomUseKey, House
 from constants import OTHER_HOUSE, NEIGHBOR, SAME_FLOOR, SAME_HOUSE
 from print_utils import print_result
 from entities import Person
@@ -42,7 +43,7 @@ model.add_allowed_assignments(
     [room_to_use(RoomUseKey.P), room_to_use(RoomUseKey.B)],
 )
 
-# min sizes for special rooms uses
+# min/max sizes for special rooms uses
 model.add_allowed_assignments(
     [
         *[assignments[room][RoomUseKey.B.value] for room in range(N)],
@@ -55,10 +56,24 @@ model.add_allowed_assignments(
     ],
     [use_to_room(room) for room in RoomKey if ROOMS[room].size >= 16],
 )
+model.add_allowed_assignments(
+    [
+        *[assignments[room][RoomUseKey.G.value] for room in range(N)],
+    ],
+    [use_to_room(room) for room in RoomKey if ROOMS[room].size <= 15],
+)
 
 # FW and JW in separate houses
 min_distance_allowed_constraint(
     model, assignments, RoomUseKey.FW, RoomUseKey.JH, OTHER_HOUSE
+)
+
+# AZ in GH
+model.add_allowed_assignments(
+    [
+        *[assignments[room][RoomUseKey.AZ.value] for room in range(N)],
+    ],
+    [use_to_room(room) for room in RoomKey if ROOMS[room].house is House.GH],
 )
 
 # AZ not next to CJ
@@ -127,6 +142,7 @@ for use_key in RoomUseKey:
 
 # ----------------- objective: minimize moves that people are reluctant to
 move_resistence_penality = {}
+size_penality = {}
 
 for use in RoomUseKey:
     if use in FUNCTIONAL_USES:
@@ -138,12 +154,30 @@ for use in RoomUseKey:
 
     move_resistence_penality[use] = sum(
         assignments[room.value][use.value]
-        * (0 if room is current_room_key else person.reluctance_to_move)
+        * (
+            0
+            if room is current_room_key
+            # reluctance to move gets more weight if person is more active
+            else 80 * (person.reluctance_to_move * pow(person.activity, 2))
+        )
+        for room in RoomKey
+    )
+
+    min_room_size_wish = person.min_room_size_wish or MIN_ROOM_SIZE
+
+    size_penality[use] = sum(
+        assignments[room.value][use.value]
+        * (
+            # bonus room size (size of room - wished size) is weighted with past room size luck and activity
+            (ROOMS[room].size - min_room_size_wish)
+            * person.was_lucky_with_room_before
+            / person.activity
+        )
         for room in RoomKey
     )
 
 
-total_penality = sum(move_resistence_penality.values())
+total_penality = sum([*move_resistence_penality.values(), *size_penality.values()])
 model.minimize(total_penality)
 previous_solutions = []
 

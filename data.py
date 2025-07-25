@@ -270,6 +270,7 @@ ROOMS: dict[RoomKey, Room] = {
         size=9.5,
     ),
 }
+MIN_ROOM_SIZE = min(room.size for _, room in ROOMS.items())
 
 ROOM_CLOSENESS: dict[tuple[RoomKey, RoomKey], int] = {
     (RoomKey.MH6, RoomKey.MH7): PASSTHROUGH,
