@@ -63,7 +63,7 @@ model.add_allowed_assignments(
     [use_to_room(room) for room in RoomKey if ROOMS[room].size <= 15],
 )
 
-# FW and JW in separate houses
+# FW and JH in separate houses
 min_distance_allowed_constraint(
     model, assignments, RoomUseKey.FW, RoomUseKey.JH, OTHER_HOUSE
 )
