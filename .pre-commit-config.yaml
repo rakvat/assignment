@@ -1,0 +1,57 @@
+# Install pre-commit hooks using `prek install` (prek is installed using mise)
+default_stages: [pre-commit]
+repos:
+  - repo: builtin
+    hooks:
+      - id: check-added-large-files
+      - id: check-symlinks
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+
+  - repo: local
+    hooks:
+      - id: python-format
+        name: Format python
+        types_or: [python, pyi]
+        language: python
+        entry: ruff format
+
+      - id: python-lint
+        name: Lint python files
+        types: [python]
+        language: python
+        entry: ruff check --fix
+
+      - id: python-types
+        name: Check python types
+        types: [python]
+        language: system # needs all uv dependencies
+        # Run through `uv run` (like CI does) so the pinned pyrefly from the
+        # lockfile is used instead of whatever happens to be on PATH.
+        entry: uv run --frozen pyrefly check
+
+      - id: toml-format
+        name: Format toml files
+        types: [toml]
+        language: system
+        entry: taplo format --diff
+
+      - id: actionlint
+        name: Lint Github Actions workflows
+        types: [yaml]
+        files: .github/workflows/
+        language: system
+        entry: actionlint
+
+      - id: shellcheck
+        name: Lint shell scripts
+        types: [shell]
+        language: system
+        entry: shellcheck
+
+      - id: yamllint
+        name: Lint YAML files
+        types: [yaml]
+        language: python
+        entry: yamllint

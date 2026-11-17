@@ -1,5 +1,5 @@
 import operator
-from typing import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 
 from ortools.sat.python import cp_model
 from ortools.sat.python.cp_model import Constraint, CpModel, IntegralT, LinearExprT
@@ -60,9 +60,7 @@ def small_distance_forbidden_constraint(
     )
 
 
-ModelMethodType = Callable[
-    [Sequence[LinearExprT], Iterable[Sequence[IntegralT]]], Constraint
-]
+ModelMethodType = Callable[[Sequence[LinearExprT], Iterable[Sequence[IntegralT]]], Constraint]
 
 
 def _distance_constraint(
@@ -71,7 +69,7 @@ def _distance_constraint(
     person1: RoomUseKey,
     person2: RoomUseKey,
     distance_threshold: int,
-    comparison_operator,
+    comparison_operator: Callable[[int, int], bool],
 ) -> None:
     model_method(
         [

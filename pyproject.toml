@@ -4,12 +4,138 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [
-	"ortools",
+dependencies = ["ortools"]
+
+[dependency-groups]
+dev = ["ruff==0.16.10", "pytest==9.1.1", "pyrefly==1.3.2", "yamllint==1.38.0"]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 120
+
+[tool.ruff.lint]
+# ruff rule overview: https://docs.astral.sh/ruff/rules/
+select = [
+  "B",      # bugbear
+  "C4",     # comprehensions
+  "DTZ",    # datetime timezone
+  "E",      # pycodestyle errors
+  "F",      # pyflakes
+  "S",      # bandit
+  "W",      # pycodestyle warnings
+  "YTT",    # flake-2020: avoid non-future proof code
+  "RUF100", # Prevent unused noqa directives
+  "I001",   # sort imports
+  "PGH003", # require error code in type-ignore directives
+  "T100",   # prevent debugger statements
+  "PIE",    # flake8-pie see https://docs.astral.sh/ruff/rules/#flake8-pie-pie
+  "UP",     # pyupgrade, requires target-version to be set correctly
 ]
 
-[project.optional-dependencies]
-dev = [
-    "black",
-    "pynvim",
+ignore = [
+  "B008", # do not perform function calls in argument defaults
+  "B904", # raise within except
+  "B905", # zip without explicit strict
+  "E5",   # line length (fixed by formatter)
+  "S101", # use of assert
+  "S105", # hard coded password
+  "S106", # hard coded password
+  "S607", # starting a process with a partial executable path
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# use `ruff rule <rule code>` to find out more about the rules
+"*_test.py" = ["B018", "S107", "S108", "S311", "S314", "S603", "S607"]
+"*_builder.py" = ["S108", "S311", "S314"]
+"__init__.py" = ["E402", "F401", "F403"]
+".github/*" = ["S603", "S607"]
+
+[tool.pyrefly.errors]
+abstract-method-call = true
+assert-type = true
+bad-argument-count = true
+bad-argument-type = true
+bad-assignment = true
+bad-class-definition = true
+bad-context-manager = true
+bad-dunder-all = true
+bad-function-definition = true
+bad-index = true
+bad-instantiation = true
+bad-keyword-argument = true
+bad-match = true
+bad-override = true
+bad-param-name-override = true
+bad-raise = true
+bad-return = true
+bad-specialization = true
+bad-typed-dict = true
+bad-typed-dict-key = true
+bad-unpacking = true
+deprecated = true
+implicit-abstract-class = true
+implicit-any = true
+implicit-any-lambda = false
+implicit-import = true
+implicitly-defined-attribute = true
+inconsistent-inheritance = true
+inconsistent-overload = true
+internal-error = true
+invalid-annotation = true
+invalid-argument = true
+invalid-decorator = true
+invalid-inheritance = true
+invalid-literal = true
+invalid-overload = true
+invalid-param-spec = true
+invalid-pattern = true
+invalid-self-type = true
+invalid-super-call = true
+invalid-syntax = true
+invalid-type-alias = true
+invalid-type-var = true
+invalid-type-var-tuple = true
+invalid-variance = true
+invalid-yield = true
+missing-argument = true
+missing-attribute = true
+missing-import = true
+missing-module-attribute = true
+missing-override-decorator = true
+missing-source = true
+missing-source-for-stubs = true
+no-access = true
+no-matching-overload = true
+non-exhaustive-match = true
+not-a-type = true
+not-async = true
+not-callable = true
+not-iterable = true
+not-required-key-access = true
+open-unpacking = true
+parse-error = true
+protocol-implicitly-defined-attribute = true
+read-only = true
+redefinition = true
+redundant-cast = true
+redundant-condition = true
+reveal-type = true
+unannotated-attribute = true
+unannotated-parameter = true
+unannotated-return = true
+unbound-name = true
+unexpected-keyword = true
+unexpected-positional-argument = true
+# unimported-directive = true # doesn't exist, even though the docs say it does
+unknown-name = true
+unnecessary-comparison = true
+unreachable = true
+unresolvable-dunder-all = true
+unsafe-overlap = true
+unsupported = true
+unsupported-delete = true
+unsupported-operation = true
+untyped-import = true
+unused-coroutine = true
+unused-ignore = true
+variance-mismatch = true
