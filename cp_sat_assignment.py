@@ -143,8 +143,8 @@ for use_key in RoomUseKey:
 
 
 # ----------------- objective: minimize moves that people are reluctant to
-move_resistence_penality = {}
-size_penality = {}
+move_resistance_penalty = {}
+size_penalty = {}
 
 for use in RoomUseKey:
     if use in FUNCTIONAL_USES:
@@ -154,7 +154,7 @@ for use in RoomUseKey:
     assert isinstance(person, Person)
     current_room_key = person.current_room_key
 
-    move_resistence_penality[use] = sum(
+    move_resistance_penalty[use] = sum(
         assignments[room.value][use.value]
         * (
             0
@@ -167,7 +167,7 @@ for use in RoomUseKey:
 
     min_room_size_wish = person.min_room_size_wish or MIN_ROOM_SIZE
 
-    size_penality[use] = sum(
+    size_penalty[use] = sum(
         assignments[room.value][use.value]
         * (
             # bonus room size (size of room - wished size) is weighted with past room size luck and activity
@@ -179,8 +179,8 @@ for use in RoomUseKey:
     )
 
 
-total_penality = sum([*move_resistence_penality.values(), *size_penality.values()])
-model.minimize(total_penality)
+total_penalty = sum([*move_resistance_penalty.values(), *size_penalty.values()])
+model.minimize(total_penalty)
 previous_solutions = []
 
 for rank in range(1, TOP_N + 1):

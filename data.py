@@ -287,8 +287,8 @@ ROOM_CLOSENESS: dict[tuple[RoomKey, RoomKey], int] = {
 }
 
 PASSTHROUGH_ROOM_KEYS: set[tuple[RoomKey, RoomKey]] = {
-    passtrough_tuple
-    for passtrough_tuple, closeness in ROOM_CLOSENESS.items()
+    passthrough_tuple
+    for passthrough_tuple, closeness in ROOM_CLOSENESS.items()
     if closeness == PASSTHROUGH
 }
 
