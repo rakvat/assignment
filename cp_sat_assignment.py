@@ -176,17 +176,14 @@ def solve_top_solutions(
     assignments: list[list[cp_model.IntVar]],
     top_n: int = TOP_N,
 ) -> None:
-    previous_solutions = []
-
     for rank in range(1, top_n + 1):
         solver = cp_model.CpSolver()
         status = solver.solve(model)
         print_result(rank, status, solver, assignments)
         solution = [solver.Value(assignments[room.value][use.value]) for use in RoomUseKey for room in RoomKey]
-        previous_solutions.append(solution)
         model.add_forbidden_assignments(
             [assignments[room.value][use.value] for use in RoomUseKey for room in RoomKey],
-            previous_solutions,
+            [solution],
         )
 
 
