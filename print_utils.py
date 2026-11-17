@@ -11,9 +11,9 @@ def print_result(
     room_assignments: list[list[cp_model.IntVar]],
 ) -> None:
     print(f"*Rank {rank:2}************")
-    if status is cp_model.OPTIMAL:
+    if status == cp_model.OPTIMAL:
         print("Optimal solution")
-    elif status is cp_model.FEASIBLE:
+    elif status == cp_model.FEASIBLE:
         print("Feasible solution")
     else:
         print("No solution found")
