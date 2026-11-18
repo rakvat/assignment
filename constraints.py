@@ -6,7 +6,7 @@ from ortools.sat.python.cp_model import Constraint, CpModel, IntegralT, LinearEx
 
 from data import N
 from enums import RoomKey, RoomUseKey
-from utils import distance, use_to_room
+from utils import distance, room_to_use, use_to_room
 
 
 def max_distance_allowed_constraint(
@@ -61,6 +61,48 @@ def small_distance_forbidden_constraint(
 
 
 ModelMethodType = Callable[[Sequence[LinearExprT], Iterable[Sequence[IntegralT]]], Constraint]
+
+
+def allowed_rooms_for_use(
+    model: CpModel,
+    assignments: list[list[cp_model.IntVar]],
+    use_key: RoomUseKey,
+    room_predicate: Callable[[RoomKey], bool],
+) -> None:
+    model.add_allowed_assignments(
+        [assignments[room][use_key.value] for room in range(N)],
+        [use_to_room(room_key) for room_key in RoomKey if room_predicate(room_key)],
+    )
+
+
+def allowed_uses_for_room(
+    model: CpModel,
+    assignments: list[list[cp_model.IntVar]],
+    room_key: RoomKey,
+    allowed_uses: Iterable[RoomUseKey],
+) -> None:
+    model.add_allowed_assignments(
+        assignments[room_key.value],
+        [room_to_use(use_key) for use_key in allowed_uses],
+    )
+
+
+def allowed_use_pairs_for_room_pair(
+    model: CpModel,
+    assignments: list[list[cp_model.IntVar]],
+    room1_key: RoomKey,
+    room2_key: RoomKey,
+    use_pair_predicate: Callable[[RoomUseKey, RoomUseKey], bool],
+) -> None:
+    model.add_allowed_assignments(
+        [*assignments[room1_key.value], *assignments[room2_key.value]],
+        [
+            [*room_to_use(use1), *room_to_use(use2)]
+            for use1 in RoomUseKey
+            for use2 in RoomUseKey
+            if use_pair_predicate(use1, use2)
+        ],
+    )
 
 
 def _distance_constraint(

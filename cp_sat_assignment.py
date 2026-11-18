@@ -2,6 +2,9 @@ from ortools.sat.python import cp_model
 
 from constants import NEIGHBOR, OTHER_HOUSE, SAME_FLOOR, SAME_HOUSE
 from constraints import (
+    allowed_rooms_for_use,
+    allowed_use_pairs_for_room_pair,
+    allowed_uses_for_room,
     max_distance_allowed_constraint,
     min_distance_allowed_constraint,
     small_distance_forbidden_constraint,
@@ -18,10 +21,6 @@ from data import (
 from entities import Person
 from enums import House, RoomKey, RoomUseKey
 from print_utils import print_result
-from utils import (
-    room_to_use,
-    use_to_room,
-)
 
 TOP_N = 10
 
@@ -36,65 +35,40 @@ def build_model() -> tuple[cp_model.CpModel, list[list[cp_model.IntVar]]]:
         model.add_exactly_one(assignments[room][use] for room in range(N))
 
     # kh1 can have only 2 uses
-    model.add_allowed_assignments(
-        assignments[RoomKey.KH1.value],
-        [room_to_use(RoomUseKey.P), room_to_use(RoomUseKey.B)],
-    )
+    allowed_uses_for_room(model, assignments, RoomKey.KH1, [RoomUseKey.P, RoomUseKey.B])
 
     # min/max sizes for special rooms uses
-    model.add_allowed_assignments(
-        [
-            *[assignments[room][RoomUseKey.B.value] for room in range(N)],
-        ],
-        [use_to_room(room) for room in RoomKey if ROOMS[room].size >= 20],
-    )
-    model.add_allowed_assignments(
-        [
-            *[assignments[room][RoomUseKey.P.value] for room in range(N)],
-        ],
-        [use_to_room(room) for room in RoomKey if ROOMS[room].size >= 16],
-    )
-    model.add_allowed_assignments(
-        [
-            *[assignments[room][RoomUseKey.G.value] for room in range(N)],
-        ],
-        [use_to_room(room) for room in RoomKey if ROOMS[room].size <= 15],
-    )
+    allowed_rooms_for_use(model, assignments, RoomUseKey.B, lambda room: ROOMS[room].size >= 20)
+    allowed_rooms_for_use(model, assignments, RoomUseKey.P, lambda room: ROOMS[room].size >= 16)
+    allowed_rooms_for_use(model, assignments, RoomUseKey.G, lambda room: ROOMS[room].size <= 15)
 
     # FW and JH in separate houses
     min_distance_allowed_constraint(model, assignments, RoomUseKey.FW, RoomUseKey.JH, OTHER_HOUSE)
 
     # AZ in GH
-    model.add_allowed_assignments(
-        [
-            *[assignments[room][RoomUseKey.AZ.value] for room in range(N)],
-        ],
-        [use_to_room(room) for room in RoomKey if ROOMS[room].house is House.GH],
-    )
+    allowed_rooms_for_use(model, assignments, RoomUseKey.AZ, lambda room: ROOMS[room].house is House.GH)
 
     # AZ not next to CJ
     small_distance_forbidden_constraint(model, assignments, RoomUseKey.AZ, RoomUseKey.CJ, NEIGHBOR)
 
     # passthrough room restrictions (room1 is the one you need to pass through to reach room2)
     for room1, room2 in PASSTHROUGH_ROOM_KEYS:
-        model.add_allowed_assignments(
-            [*assignments[room1.value], *assignments[room2.value]],
-            [
-                [*room_to_use(use1), *room_to_use(use2)]
-                for use1 in RoomUseKey
-                for use2 in RoomUseKey
-                if use1 is not RoomUseKey.G
-                and
+        allowed_use_pairs_for_room_pair(
+            model,
+            assignments,
+            room1,
+            room2,
+            lambda use1, use2: (
+                use1 is not RoomUseKey.G
                 # use2 is functional -> use1 needs to be functional
-                not (use2 in FUNCTIONAL_USES and use1 not in FUNCTIONAL_USES)
-                and
-                # use1 and use2 non functiona -> only selected used allowed
-                not (
+                and not (use2 in FUNCTIONAL_USES and use1 not in FUNCTIONAL_USES)
+                # use1 and use2 non functional -> only selected uses allowed
+                and not (
                     use1 not in FUNCTIONAL_USES
                     and use2 not in FUNCTIONAL_USES
                     and (use1, use2) not in PASSTHROUGH_CANDIDATE_KEYS
                 )
-            ],
+            ),
         )
 
     # same floor wishes
@@ -126,9 +100,11 @@ def build_model() -> tuple[cp_model.CpModel, list[list[cp_model.IntVar]]]:
         person = ROOM_USES[use_key]
         assert isinstance(person, Person)
         if person.min_room_size_wish:
-            model.add_allowed_assignments(
-                [assignments[room][use_key.value] for room in range(N)],
-                [use_to_room(room_key) for room_key in RoomKey if ROOMS[room_key].size >= person.min_room_size_wish],
+            allowed_rooms_for_use(
+                model,
+                assignments,
+                use_key,
+                lambda room, min_size=person.min_room_size_wish: ROOMS[room].size >= min_size,
             )
 
     # ----------------- objective: minimize moves that people are reluctant to
