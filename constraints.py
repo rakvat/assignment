@@ -4,14 +4,15 @@ from collections.abc import Callable, Iterable, Sequence
 from ortools.sat.python import cp_model
 from ortools.sat.python.cp_model import Constraint, CpModel, IntegralT, LinearExprT
 
-from data import N
 from enums import RoomKey, RoomUseKey
 from utils import distance, room_to_use, use_to_room
+
+Assignments = dict[RoomKey, dict[RoomUseKey, cp_model.IntVar]]
 
 
 def max_distance_allowed_constraint(
     model: CpModel,
-    assignments: list[list[cp_model.IntVar]],
+    assignments: Assignments,
     person1: RoomUseKey,
     person2: RoomUseKey,
     distance_threshold: int,
@@ -28,7 +29,7 @@ def max_distance_allowed_constraint(
 
 def min_distance_allowed_constraint(
     model: CpModel,
-    assignments: list[list[cp_model.IntVar]],
+    assignments: Assignments,
     person1: RoomUseKey,
     person2: RoomUseKey,
     distance_threshold: int,
@@ -45,7 +46,7 @@ def min_distance_allowed_constraint(
 
 def small_distance_forbidden_constraint(
     model: CpModel,
-    assignments: list[list[cp_model.IntVar]],
+    assignments: Assignments,
     person1: RoomUseKey,
     person2: RoomUseKey,
     distance_threshold: int,
@@ -65,37 +66,40 @@ ModelMethodType = Callable[[Sequence[LinearExprT], Iterable[Sequence[IntegralT]]
 
 def allowed_rooms_for_use(
     model: CpModel,
-    assignments: list[list[cp_model.IntVar]],
+    assignments: Assignments,
     use_key: RoomUseKey,
     room_predicate: Callable[[RoomKey], bool],
 ) -> None:
     model.add_allowed_assignments(
-        [assignments[room][use_key.value] for room in range(N)],
+        [assignments[room][use_key] for room in RoomKey],
         [use_to_room(room_key) for room_key in RoomKey if room_predicate(room_key)],
     )
 
 
 def allowed_uses_for_room(
     model: CpModel,
-    assignments: list[list[cp_model.IntVar]],
+    assignments: Assignments,
     room_key: RoomKey,
     allowed_uses: Iterable[RoomUseKey],
 ) -> None:
     model.add_allowed_assignments(
-        assignments[room_key.value],
+        [assignments[room_key][use] for use in RoomUseKey],
         [room_to_use(use_key) for use_key in allowed_uses],
     )
 
 
 def allowed_use_pairs_for_room_pair(
     model: CpModel,
-    assignments: list[list[cp_model.IntVar]],
+    assignments: Assignments,
     room1_key: RoomKey,
     room2_key: RoomKey,
     use_pair_predicate: Callable[[RoomUseKey, RoomUseKey], bool],
 ) -> None:
     model.add_allowed_assignments(
-        [*assignments[room1_key.value], *assignments[room2_key.value]],
+        [
+            *(assignments[room1_key][use] for use in RoomUseKey),
+            *(assignments[room2_key][use] for use in RoomUseKey),
+        ],
         [
             [*room_to_use(use1), *room_to_use(use2)]
             for use1 in RoomUseKey
@@ -107,7 +111,7 @@ def allowed_use_pairs_for_room_pair(
 
 def _distance_constraint(
     model_method: ModelMethodType,
-    assignments: list[list[cp_model.IntVar]],
+    assignments: Assignments,
     person1: RoomUseKey,
     person2: RoomUseKey,
     distance_threshold: int,
@@ -115,8 +119,8 @@ def _distance_constraint(
 ) -> None:
     model_method(
         [
-            *[assignments[room][person1.value] for room in range(N)],
-            *[assignments[room][person2.value] for room in range(N)],
+            *[assignments[room][person1] for room in RoomKey],
+            *[assignments[room][person2] for room in RoomKey],
         ],
         [
             [*use_to_room(room1), *use_to_room(room2)]

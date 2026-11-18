@@ -2,6 +2,7 @@ from ortools.sat.python import cp_model
 
 from constants import NEIGHBOR, OTHER_HOUSE, SAME_FLOOR, SAME_HOUSE
 from constraints import (
+    Assignments,
     allowed_rooms_for_use,
     allowed_use_pairs_for_room_pair,
     allowed_uses_for_room,
@@ -16,7 +17,6 @@ from data import (
     PASSTHROUGH_ROOM_KEYS,
     ROOM_USES,
     ROOMS,
-    N,
 )
 from entities import Person
 from enums import House, RoomKey, RoomUseKey
@@ -25,14 +25,16 @@ from print_utils import print_result
 TOP_N = 10
 
 
-def build_model() -> tuple[cp_model.CpModel, list[list[cp_model.IntVar]]]:
+def build_model() -> tuple[cp_model.CpModel, Assignments]:
     model = cp_model.CpModel()
 
-    assignments = [[model.new_bool_var(f"room_{room}/use_{use}") for use in range(N)] for room in range(N)]
-    for room in range(N):
-        model.add_exactly_one(assignments[room][use] for use in range(N))
-    for use in range(N):
-        model.add_exactly_one(assignments[room][use] for room in range(N))
+    assignments: Assignments = {
+        room: {use: model.new_bool_var(f"{room.name}_{use.name}") for use in RoomUseKey} for room in RoomKey
+    }
+    for room in RoomKey:
+        model.add_exactly_one(assignments[room][use] for use in RoomUseKey)
+    for use in RoomUseKey:
+        model.add_exactly_one(assignments[room][use] for room in RoomKey)
 
     # kh1 can have only 2 uses
     allowed_uses_for_room(model, assignments, RoomKey.KH1, [RoomUseKey.P, RoomUseKey.B])
@@ -120,7 +122,7 @@ def build_model() -> tuple[cp_model.CpModel, list[list[cp_model.IntVar]]]:
         current_room_key = person.current_room_key
 
         move_resistance_penalty[use] = sum(
-            assignments[room.value][use.value]
+            assignments[room][use]
             * (
                 0
                 if room is current_room_key
@@ -133,7 +135,7 @@ def build_model() -> tuple[cp_model.CpModel, list[list[cp_model.IntVar]]]:
         min_room_size_wish = person.min_room_size_wish or MIN_ROOM_SIZE
 
         size_penalty[use] = sum(
-            assignments[room.value][use.value]
+            assignments[room][use]
             * (
                 # bonus room size (size of room - wished size) is weighted with past room size luck and activity
                 (ROOMS[room].size - min_room_size_wish) * person.was_lucky_with_room_before / person.activity
@@ -149,16 +151,16 @@ def build_model() -> tuple[cp_model.CpModel, list[list[cp_model.IntVar]]]:
 
 def solve_top_solutions(
     model: cp_model.CpModel,
-    assignments: list[list[cp_model.IntVar]],
+    assignments: Assignments,
     top_n: int = TOP_N,
 ) -> None:
     for rank in range(1, top_n + 1):
         solver = cp_model.CpSolver()
         status = solver.solve(model)
         print_result(rank, status, solver, assignments)
-        solution = [solver.Value(assignments[room.value][use.value]) for use in RoomUseKey for room in RoomKey]
+        solution = [solver.Value(assignments[room][use]) for room in RoomKey for use in RoomUseKey]
         model.add_forbidden_assignments(
-            [assignments[room.value][use.value] for use in RoomUseKey for room in RoomKey],
+            [assignments[room][use] for room in RoomKey for use in RoomUseKey],
             [solution],
         )
 

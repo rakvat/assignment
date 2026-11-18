@@ -146,9 +146,7 @@ ROOM_USES: dict[RoomUseKey, Person | Function] = {
     ),
 }
 
-FUNCTIONAL_USES = {
-    use_key for use_key in RoomUseKey if isinstance(ROOM_USES[use_key], Function)
-}
+FUNCTIONAL_USES = {use_key for use_key in RoomUseKey if isinstance(ROOM_USES[use_key], Function)}
 
 ROOMS: dict[RoomKey, Room] = {
     RoomKey.KH0: Room(
@@ -287,9 +285,7 @@ ROOM_CLOSENESS: dict[tuple[RoomKey, RoomKey], int] = {
 }
 
 PASSTHROUGH_ROOM_KEYS: set[tuple[RoomKey, RoomKey]] = {
-    passthrough_tuple
-    for passthrough_tuple, closeness in ROOM_CLOSENESS.items()
-    if closeness == PASSTHROUGH
+    passthrough_tuple for passthrough_tuple, closeness in ROOM_CLOSENESS.items() if closeness == PASSTHROUGH
 }
 
 PASSTHROUGH_CANDIDATE_KEYS: set[tuple[RoomUseKey, RoomUseKey]] = {
@@ -297,6 +293,6 @@ PASSTHROUGH_CANDIDATE_KEYS: set[tuple[RoomUseKey, RoomUseKey]] = {
     (RoomUseKey.AZ, RoomUseKey.LR),
 }
 
-assert (
-    (N := len(ROOMS)) == len(ROOM_USES)
-), "as we do 1-to-1 assignment, the number of rooms has to equal the number of room uses"
+assert len(ROOMS) == len(ROOM_USES), (
+    "as we do 1-to-1 assignment, the number of rooms has to equal the number of room uses"
+)

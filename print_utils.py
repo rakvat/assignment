@@ -1,6 +1,7 @@
 from ortools.sat.python import cp_model
 
-from data import ROOM_USES, ROOMS, N
+from constraints import Assignments
+from data import ROOM_USES, ROOMS
 from enums import RoomKey, RoomUseKey
 
 
@@ -8,7 +9,7 @@ def print_result(
     rank: int,
     status: cp_model.CpSolverStatus,
     solver: cp_model.CpSolver,
-    room_assignments: list[list[cp_model.IntVar]],
+    room_assignments: Assignments,
 ) -> None:
     print(f"*Rank {rank:2}************")
     if status == cp_model.OPTIMAL:
@@ -21,8 +22,8 @@ def print_result(
 
     print(f"Objective: {solver.objective_value:.2f}")
     print("********************")
-    for room in range(N):
-        assigned_use = [use for use in range(N) if solver.Value(room_assignments[room][use])][0]
-        print(f"{ROOMS[RoomKey(room)].__repr__():4} -> {ROOM_USES[RoomUseKey(assigned_use)]}")
+    for room in RoomKey:
+        assigned_use = next(use for use in RoomUseKey if solver.Value(room_assignments[room][use]))
+        print(f"{ROOMS[room].__repr__():4} -> {ROOM_USES[assigned_use]}")
 
     print("********************")

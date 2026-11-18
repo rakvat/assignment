@@ -1,16 +1,16 @@
 from constants import OTHER_HOUSE, SAME_FLOOR, SAME_HOUSE
-from data import ROOM_CLOSENESS, ROOMS, N
+from data import ROOM_CLOSENESS, ROOMS
 from enums import House, RoomKey, RoomUseKey
 
 
 # room gets assigned to a use
 def room_to_use(use: RoomUseKey) -> list[int]:
-    return [1 if i == use.value else 0 for i in range(N)]
+    return [int(candidate is use) for candidate in RoomUseKey]
 
 
 # use is given a room
 def use_to_room(room: RoomKey) -> list[int]:
-    return [1 if i == room.value else 0 for i in range(N)]
+    return [int(candidate is room) for candidate in RoomKey]
 
 
 def distance(room1_key: RoomKey, room2_key: RoomKey) -> int:
@@ -25,8 +25,6 @@ def distance(room1_key: RoomKey, room2_key: RoomKey) -> int:
     room2 = ROOMS[room2_key]
     if room1.house is room2.house and room1.floor == room2.floor:
         return SAME_FLOOR
-    if room1.house is room2.house or (
-        room1.house in (House.KH, House.MH) and room2.house in (House.KH, House.MH)
-    ):
+    if room1.house is room2.house or (room1.house in (House.KH, House.MH) and room2.house in (House.KH, House.MH)):
         return SAME_HOUSE
     return OTHER_HOUSE
