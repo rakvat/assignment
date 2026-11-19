@@ -1,6 +1,6 @@
-from constants import NEIGHBOR, PASSTHROUGH
-from entities import Function, Person, Room
-from enums import House, RoomKey, RoomUseKey
+from .constants import NEIGHBOR, PASSTHROUGH
+from .entities import Function, Person, Room
+from .enums import House, RoomKey, RoomUseKey
 
 ROOM_USES: dict[RoomUseKey, Person | Function] = {
     RoomUseKey.G: Function(key=RoomUseKey.G),

@@ -1,8 +1,8 @@
 from ortools.sat.python import cp_model
 
-from constraints import Assignments
-from data import ROOM_USES, ROOMS
-from enums import RoomKey, RoomUseKey
+from .constraints import Assignments
+from .data import ROOM_USES, ROOMS
+from .enums import RoomKey, RoomUseKey
 
 
 def print_result(

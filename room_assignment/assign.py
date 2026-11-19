@@ -1,7 +1,7 @@
 from ortools.sat.python import cp_model
 
-from constants import NEIGHBOR, OTHER_HOUSE, SAME_FLOOR, SAME_HOUSE
-from constraints import (
+from .constants import NEIGHBOR, OTHER_HOUSE, SAME_FLOOR, SAME_HOUSE
+from .constraints import (
     Assignments,
     allowed_rooms_for_use,
     allowed_use_pairs_for_room_pair,
@@ -10,7 +10,7 @@ from constraints import (
     min_distance_allowed_constraint,
     small_distance_forbidden_constraint,
 )
-from data import (
+from .data import (
     FUNCTIONAL_USES,
     MIN_ROOM_SIZE,
     PASSTHROUGH_CANDIDATE_KEYS,
@@ -18,9 +18,9 @@ from data import (
     ROOM_USES,
     ROOMS,
 )
-from entities import Person
-from enums import House, RoomKey, RoomUseKey
-from print_utils import print_result
+from .entities import Person
+from .enums import House, RoomKey, RoomUseKey
+from .print_utils import print_result
 
 TOP_N = 10
 

@@ -1,0 +1,28 @@
+id,label,description,score
+1,Upstairs Hall Shelves,"check supplies, twice a week",0.1
+2,Upstairs Hall Grill cleaning,"load dishwasher, twice a week",6
+3,Basement Recycling,"wash linens, twice a month",2
+4,Basement Vacuuming,"sweep outdoor area, twice a month",1
+5,Upstairs Hall Linens,"clean out fridge, once a year",0.5
+6,Hallway Dusting,"clean windows, 1-2x per week",1
+7,Downstairs Kitchen Fridge cleanout,"empty bins, weekly",0.2
+8,Upstairs Hall Inventory,"deep clean, every 2 weeks",0.4
+9,Upstairs Kitchen Dusting,"wash linens, twice a month",0.5
+10,Downstairs Kitchen Deep clean,"deep clean, twice a week",1.5
+11,Attic Supplies check,"take inventory and declutter, every 3 months",0.5
+12,Upstairs Kitchen Shelves,"wipe down, every 3 months",3
+13,Dining Room Shelves,"sweep outdoor area, every 4-6 weeks",1
+14,Office Recycling,"check supplies, 1-2x per week",1.5
+15,Upstairs Hall Bins,"clean the grill, once a year",4
+16,Storage Room Dusting,"wipe down, once a year",0.5
+17,Garden Outdoor sweep,"dust, twice a week",0.4
+18,Laundry Room Linens,"clean the grill, twice a month",1.5
+19,Downstairs Bath Fridge cleanout,"dust, every 3 months",0.5
+20,Downstairs Bath Linens,"clean windows, weekly",2
+21,Stairwell Dusting,"clean out fridge, 1-2x per week",1.5
+22,Upstairs Kitchen Wipe-down,"wash linens, twice a month",1
+23,Attic Grill cleaning,"clean out fridge, once a year",0.2
+24,Downstairs Kitchen Recycling,"clean windows, every 3 months",1
+25,Stairwell Fridge cleanout,"deep clean, every 4-6 weeks",0.1
+26,Attic Bins,"clean windows, every 4-6 weeks",0.5
+27,Dining Room Dusting,"check supplies, every 2 weeks",0.5

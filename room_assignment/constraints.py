@@ -4,8 +4,8 @@ from collections.abc import Callable, Iterable, Sequence
 from ortools.sat.python import cp_model
 from ortools.sat.python.cp_model import Constraint, CpModel, IntegralT, LinearExprT
 
-from enums import RoomKey, RoomUseKey
-from utils import distance, room_to_use, use_to_room
+from .enums import RoomKey, RoomUseKey
+from .utils import distance, room_to_use, use_to_room
 
 Assignments = dict[RoomKey, dict[RoomUseKey, cp_model.IntVar]]
 
