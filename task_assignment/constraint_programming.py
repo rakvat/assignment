@@ -10,6 +10,11 @@ Assignments = dict[str, dict[int, cp_model.IntVar]]
 # need integer expressions, so all penalty terms use scaled integer scores
 SCORE_SCALE = 100
 
+# objective component weights (percentages)
+DEVIATION_WEIGHT = 20
+DISLIKE_WEIGHT = 50
+LIKE_WEIGHT = 30
+
 
 def _scaled_score(score: float) -> int:
     return round(score * SCORE_SCALE)
@@ -42,16 +47,18 @@ def _build_model(data: Data, dislikes_hard_constraint: bool) -> tuple[cp_model.C
         assigned_score = sum(_scaled_score(task.score) * assignments[group.name][task.id] for task in data.tasks)
         deviation = model.new_int_var(0, _scaled_score(data.total_task_score), f"deviation_{group.name}")
         model.add_abs_equality(deviation, assigned_score - _scaled_score(group.target_score))
-        penalty_terms.append(deviation)
+        penalty_terms.append(DEVIATION_WEIGHT * deviation)
 
         # 2. assigned disliked tasks
         penalty_terms.append(
-            sum(_scaled_score(task.score) * assignments[group.name][task.id] for task in group.disliked_tasks)
+            DISLIKE_WEIGHT
+            * sum(_scaled_score(task.score) * assignments[group.name][task.id] for task in group.disliked_tasks)
         )
 
         # 3. not assigned liked tasks
         penalty_terms.append(
-            sum(_scaled_score(task.score) * (1 - assignments[group.name][task.id]) for task in group.liked_tasks)
+            LIKE_WEIGHT
+            * sum(_scaled_score(task.score) * (1 - assignments[group.name][task.id]) for task in group.liked_tasks)
         )
 
     model.minimize(sum(penalty_terms))
