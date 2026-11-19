@@ -1,9 +1,8 @@
-from .ingestion import import_data, validate_data
+from .ingestion import import_data
 
 
 def main() -> None:
-    data = import_data()
-    validate_data(data)
+    import_data()
     # build model
     # assign
     # output
