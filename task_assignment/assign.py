@@ -1,11 +1,12 @@
 from .ingestion import import_data
+from .print_utils import print_assignment
 
 
 def main() -> None:
-    import_data()
+    data = import_data()
     # build model
     # assign
-    # output
+    print_assignment(data)
 
 
 if __name__ == "__main__":
