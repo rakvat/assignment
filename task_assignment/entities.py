@@ -39,6 +39,10 @@ class Group:
     def set_target_score(self, total_task_score: float, total_capacity: float) -> None:
         self.target_score = total_task_score * self.capacity / total_capacity
 
+    def set_assigned_tasks(self, tasks: list[Task]) -> None:
+        self.assigned_tasks = tasks
+        self.assigned_score = sum(task.score for task in tasks)
+
 
 @dataclass
 class Data:
@@ -64,6 +68,11 @@ class Data:
         if len(task_ids) != len(set(task_ids)):
             raise ValueError("task ids are not unique")
 
+        group_name_list = [group.name for group in self.groups]
+        if len(group_name_list) != len(set(group_name_list)):
+            raise ValueError("group names are not unique")
+        group_names = set(group_name_list)
+
         known_task_ids = set(task_ids)
         for group in self.groups:
             liked_ids = {task.id for task in group.liked_tasks}
@@ -76,7 +85,6 @@ class Data:
                     f"group {group.name} likes and dislikes the same tasks: {sorted(liked_ids & disliked_ids)}"
                 )
 
-        group_names = {group.name for group in self.groups}
         for person in self.people:
             if person.capacity > 0 and person.group not in group_names:
                 raise ValueError(f"person {person.name} has capacity but is not in any group")

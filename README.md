@@ -33,10 +33,10 @@ python -m task_assignment.assign
 
 ### Data
 
-Input data goes in `task_assignment/data/` as `people.csv` and
-`tasks.csv` (gitignored). To get started, copy the anonymized examples
-into `data/` and edit them:
+Input data goes in `task_assignment/data/` as `people.csv`, `tasks.csv`,
+and `preferences.csv` (gitignored). To get started, copy the anonymized
+examples into `data/` and edit them:
 
 ```
-cp task_assignment/example_data/people.csv task_assignment/example_data/tasks.csv task_assignment/data/
+cp task_assignment/example_data/*.csv task_assignment/data/
 ```
