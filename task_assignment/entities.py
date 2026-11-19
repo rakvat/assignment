@@ -60,7 +60,26 @@ class Data:
         self._validate()
 
     def _validate(self) -> None:
-        # TODO
+        task_ids = [task.id for task in self.tasks]
+        if len(task_ids) != len(set(task_ids)):
+            raise ValueError("task ids are not unique")
+
+        known_task_ids = set(task_ids)
+        for group in self.groups:
+            liked_ids = {task.id for task in group.liked_tasks}
+            disliked_ids = {task.id for task in group.disliked_tasks}
+            unknown_ids = (liked_ids | disliked_ids) - known_task_ids
+            if unknown_ids:
+                raise ValueError(f"group {group.name} references unknown task ids: {sorted(unknown_ids)}")
+            if liked_ids & disliked_ids:
+                raise ValueError(
+                    f"group {group.name} likes and dislikes the same tasks: {sorted(liked_ids & disliked_ids)}"
+                )
+
+        group_names = {group.name for group in self.groups}
+        for person in self.people:
+            if person.capacity > 0 and person.group not in group_names:
+                raise ValueError(f"person {person.name} has capacity but is not in any group")
 
         if self.total_capacity != sum(group.capacity for group in self.groups):
             raise ValueError("capacity numbers are inconsistent")
